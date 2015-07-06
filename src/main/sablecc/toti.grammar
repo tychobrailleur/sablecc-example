@@ -1,0 +1,26 @@
+Package toti;
+
+Helpers
+  digit = ['0' .. '9'];
+  tab = 9;
+  cr = 13;
+  lf = 10;
+  eol = cr lf | cr | lf;
+  letter = ['a' .. 'z'] | ['A' .. 'Z'];
+
+Tokens
+  comma = ',';
+  blank = (' ' | tab | eol)+;
+
+  val = 'val';
+  identifier = letter (letter | digit)*;
+
+Ignored Tokens
+  blank;
+
+Productions
+  grammar = expressions;
+
+  expressions = expression*;
+  expression = declaration;
+  declaration = {val} val identifier | {multi_val} declaration comma identifier;
