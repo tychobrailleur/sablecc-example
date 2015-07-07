@@ -1,0 +1,7 @@
+#!/bin/sh
+
+
+BASEDIR=$(dirname $0)
+TOTI_DIR=${BASEDIR}/..
+
+java -jar ${TOTI_DIR}/target/toti-0.0.1-SNAPSHOT.jar $*

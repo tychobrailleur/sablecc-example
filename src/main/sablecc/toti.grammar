@@ -10,9 +10,14 @@ Helpers
 
 Tokens
   comma = ',';
+  assign = '=';
+  l_paren = '(';
+  r_paren = ')';
   blank = (' ' | tab | eol)+;
+  number = digit+;
 
   val = 'val';
+  print = 'print';
   identifier = letter (letter | digit)*;
 
 Ignored Tokens
@@ -22,5 +27,7 @@ Productions
   grammar = expressions;
 
   expressions = expression*;
-  expression = declaration;
+  expression = {decl} declaration  | {assignment} assignment | {print} print_stmt;
   declaration = {val} val identifier | {multi_val} declaration comma identifier;
+  assignment = {assign} identifier assign number;
+  print_stmt = print l_paren identifier r_paren;
