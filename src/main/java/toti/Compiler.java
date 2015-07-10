@@ -4,22 +4,37 @@ import toti.lexer.*;
 import toti.node.*;
 import java.io.*;
 
-
+/**
+ * Toti compiler class.
+ */
 public class Compiler {
+
     public void compile(String[] args) {
         try {
-            String filename = args[0];
+            String filename = args[1];
             Parser p = parseFile(filename);
 
             // Parse the input.
             Start tree = p.parse();
 
-            // Apply the translation.
-            tree.apply(new Translation());
+            if ("compile".equals(args[0])) {
+                interprete(tree);
+            } else if ("ast".equals(args[0])) {
+                dumpAst(tree);
+            }
+
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+
+    private void dumpAst(Start tree) {
+        tree.apply(new AstDump());
+    }
+
+    private void interprete(Start tree) {
+        tree.apply(new Translation());
     }
 
     private Parser parseFile(String filename) throws FileNotFoundException {
