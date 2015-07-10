@@ -1,18 +1,26 @@
 Package toti;
 
 Helpers
+  all = [0 .. 0xffff];
   digit = ['0' .. '9'];
   tab = 9;
   cr = 13;
   lf = 10;
   eol = cr lf | cr | lf;
   letter = ['a' .. 'z'] | ['A' .. 'Z'];
+  no_eol = [all - [cr + lf]];
+  hash = '#';
 
 Tokens
   comma = ',';
   assign = '=';
+  op_plus = '+';
+  op_minus = '-';
+  op_mult = '*';
+  op_div = '/';
   l_paren = '(';
   r_paren = ')';
+
   blank = (' ' | tab | eol)+;
   number = digit+;
 
@@ -20,14 +28,45 @@ Tokens
   print = 'print';
   identifier = letter (letter | digit)*;
 
+  comment = hash no_eol* eol;
+
 Ignored Tokens
-  blank;
+  blank,
+  comment;
 
 Productions
-  grammar = expressions;
+  grammar = statement*;
+  statement {-> statement} = {decl} declaration {-> declaration.statement }
+            | {assignment} assignment {-> assignment.statement }
+            | {print} print_stmt {-> print_stmt.statement};
+  declaration {-> statement} = {val} val [id]:identifier {-> New statement.decl(id) }
+             /* | {multi_val} declaration comma identifier */
+             ;
+  assignment {-> statement} = {assign} [id]:identifier assign [e]:expression {-> New statement.assignment(id, e)};
+  print_stmt {-> statement} = print l_paren [id]:identifier r_paren {-> New statement.print(id)};
 
-  expressions = expression*;
-  expression = {decl} declaration  | {assignment} assignment | {print} print_stmt;
-  declaration = {val} val identifier | {multi_val} declaration comma identifier;
-  assignment = {assign} identifier assign number;
-  print_stmt = print l_paren identifier r_paren;
+  expression {-> expression} = {sub} [left]:expression op_minus [right]:factor {-> New expression.sub(left.expression, right.expression)}
+            | {add} [left]:expression op_plus [right]:factor  {-> New expression.add(left.expression, right.expression)}
+            | {factor} factor {-> factor.expression};
+
+  factor {-> expression} = {mult} [left]:factor op_mult [right]:term {-> New expression.mult(left.expression, right.expression)}
+        | {div} [left]:factor op_div [right]:term {-> New expression.div(left.expression, right.expression)}
+        | {term} term {-> term.expression};
+
+  term {-> expression} = {number} number {-> New expression.number(number)}
+        | {exp} l_paren expression r_paren {-> expression.expression };
+
+
+Abstract Syntax Tree
+
+  grammar = statement*;
+
+  statement = {decl} [id]:identifier
+            | {assignment} [id]:identifier [value]:expression
+            | {print} [id]:identifier;
+
+  expression = {add} [left]:expression [right]:expression
+             | {sub} [left]:expression [right]:expression
+             | {mult} [left]:expression [right]:expression
+             | {div} [left]:expression [right]:expression
+             | {number} number;
